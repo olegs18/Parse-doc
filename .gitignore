@@ -1,0 +1,6 @@
+arch
+save
+*.json
+*.csv
+*.txt
+_pycache__
