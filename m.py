@@ -165,7 +165,8 @@ def parse_table(document):
                         row3 = False
                         # print([paragraph.text, [paragraph.style.font.size]])
                     else:
-                        print(paragraph.text)
+                        pass
+                        # print(paragraph.text)
 
                     if 'с. _________, вул. ______' in paragraph.text:
                         tmp_format = style2
@@ -231,7 +232,7 @@ if 0:
 
 if len(out_) > 0:
     with open(r"result.txt", "w", encoding="utf-8") as file:
-        print(out_)
+        # print(out_)
         pattern = r'\s{1,}'
         file.write('Технологічні картки адміністративної послуги' + '\n' +
                    ('-' * 60 ) + '\n')

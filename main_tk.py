@@ -15,7 +15,7 @@ import sys
 from natsort import ns, natsort_keygen
 import re
 import csv_find
-out_ = []
+
 
 def image_to_jpg(image_path):
     path = Path(image_path)
@@ -95,62 +95,78 @@ def parse_content(document):
 # Указываем путь к директории
 sub_cat = '../../Цнап/Картки/ТК'
 directory = os.getcwd() + f'/{sub_cat}'
-
-# Получаем список файлов
-files = list( filter(lambda w: "~$" not in w, os.listdir(directory) ) )
-# files.sort()
-files.sort(key=natsort_keygen(alg=ns.REAL))
-# print(files)
-# Выводим список файлов
-for name in files:
-    # continue
-    if not ('.doc' in name or '.rtf' in name):
-        continue
-    path = Path(f'{sub_cat}/'+name)
-    if path.suffix in ['.doc', '.rtf'] and '.docx' not in name:
-        ok = ConvertRtfToDocx(directory, name)
-        if ok:
-            name = name.replace('doc', 'docx').replace('rtf', 'docx')
-            path = Path(f'{sub_cat}/'+name)
-            out_ += name
-            
-    out_.append( str(path) )
-    if path.suffix in {'.docx'}:
-        d_ = open_doc(f'{sub_cat}/'+name)
-        new_d = parse_content(d_)
-        # print()
-        # new_d.save('save/demo.docx')
-# parse_table()
-if len(out_) > 0:
+def pr_s(s, sub):
+    global directory, sub_cat
+    directory = s
+    if sub:
+        sub_cat = sub
+def pr_d():
+    print(directory, Path(f'{sub_cat}/'))
+def go(edit_kart):
+    global out_
+    out_ = []
+    # Получаем список файлов
+    files = list( filter(lambda w: "~$" not in w, os.listdir(directory) ) )
+    # files.sort()
+    files.sort(key=natsort_keygen(alg=ns.REAL))
+    # print(files)
+    # Выводим список файлов
+    for name in files:
+        # continue
+        if not ('.doc' in name or '.rtf' in name):
+            continue
+        path = Path(f'{sub_cat}/'+name)
+        if path.suffix in ['.doc', '.rtf'] and '.docx' not in name:
+            ok = ConvertRtfToDocx(directory, name)
+            if ok:
+                name = name.replace('doc', 'docx').replace('rtf', 'docx')
+                path = Path(f'{sub_cat}/'+name)
+                
+        out_.append( str(path) )
+        if path.suffix in {'.docx'}:
+            d_ = open_doc(f'{sub_cat}/'+name)
+            new_d = parse_content(d_)
+            # print()
+            # new_d.save('save/demo.docx')
+    # parse_table()
     c = j = t_= no_found = 0
     no_f = []
-    with open(r"result.txt", "w", encoding="utf-8") as file:
-        # print(out_)
-        pattern = r'\s{1,}'
-        file.write('Технологічні картки адміністративної послуги' + '\n' +
-                   ('-' * 60 ) + '\n')
-        for  line in out_:
-            if '..\\..\\' in line:
-                line = line.replace('..\\..\\', '\n')
-                t = int( line.replace('Цнап\\Картки\\ТК\\ТК ', '').replace('.docx', '') )
-                if t - t_ != 1:
-                    no_f.append( str(int ( (t + t_)/2 )) )
-                t_ = t
-            else:
-                line = line.replace('Технологічна картка адміністративної послуги', '').strip()
-                line = re.sub(r'ннн', 'нн', line, flags=re.IGNORECASE)
-                line = re.sub(r'посвідченЯ', 'посвідчення', line, flags=re.IGNORECASE)
-                line = re.sub(pattern, ' ', line)
-                usluga = csv_find.find_posl(line)
-                
-                if len(usluga) > 0:
-                    if usluga[0] != '523p':
-                        c += 1
-                    else:
-                        usluga[1] += ' [{}] '.format(usluga[3])
-                        j += 1
-                    line =  '{} '.format(usluga[1]) + line
-            file.write(line + '\n')
-if len(no_f) > 0:
-    print(f'Нет {len(no_f)} карточек, а именно: ' + ', '.join(no_f))
-print(c, j)
+    if len(out_) > 0:
+        with open(r"result.txt", "w", encoding="utf-8") as file:
+            # print(out_)
+            pattern = r'\s{1,}'
+            file.write('Технологічні картки адміністративної послуги' + '\n' +
+                    ('-' * 60 ) + '\n')
+            for  line in out_:
+                if '..\\..\\' in line:
+                    line = line.replace('..\\..\\', '\n')
+                    try:
+                        t = int( line.replace('Цнап\\Картки\\ТК\\ТК ', '').replace('.docx', '') )
+                        if t - t_ != 1:
+                            no_f.append( str(int ( (t + t_)/2 )) )
+                        t_ = t
+                    except Exception as e:
+                        t = int(  t_  ) + 1
+                        if t - t_ != 1:
+                            no_f.append( str(int ( (t + t_)/2 )) )
+                        t_ = t
+                else:
+                    line = line.replace('Технологічна картка адміністративної послуги', '').strip()
+                    line = re.sub(r'ннн', 'нн', line, flags=re.IGNORECASE)
+                    line = re.sub(r'посвідченЯ', 'посвідчення', line, flags=re.IGNORECASE)
+                    line = re.sub(pattern, ' ', line)
+                    usluga = csv_find.find_posl(line)
+                    
+                    if len(usluga) > 0:
+                        if usluga[0] != '523p':
+                            c += 1
+                        else:
+                            usluga[1] += ' [{}] '.format(usluga[3])
+                            j += 1
+                        line =  '{} '.format(usluga[1]) + line
+                file.write(line + '\n')
+    if len(no_f) > 0:
+        print(f'Нет {len(no_f)} карточек, а именно: ' + ', '.join(no_f))
+    if len(out_) > 0:
+        print(f'Карточек, которые относятся к ЦНАП: {c}, осльные (к относятся к городу): {j}')
+# go(edit_kart=0)

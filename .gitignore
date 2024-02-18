@@ -6,3 +6,7 @@ save
 *.docx
 *.txt
 __pycache__
+dist
+build
+main.spec
+static
